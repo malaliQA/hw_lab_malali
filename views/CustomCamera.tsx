@@ -122,17 +122,18 @@ export default function CustomCamera({ emojiNames, onEmojiFound, onTensorLoaded 
 
 // Turns a photo file into a 224x224x3 RGB tensor, the input shape MobileNet expects.
 async function imageToTensor(uri: string) {
-    // Resize to MobileNet's expected 224x224 input.
+    // Resize to MobileNet's expected 224x224 input, and get the JPEG back as base64.
     const resized = await ImageManipulator.manipulateAsync(
         uri,
         [{ resize: { width: 224, height: 224 } }],
-        { format: ImageManipulator.SaveFormat.JPEG },
+        { format: ImageManipulator.SaveFormat.JPEG, base64: true },
     );
 
-    // Fetch the resized file and decode the JPEG into RGB(A) pixels.
-    const response = await fetch(resized.uri);
-    const buffer = await response.arrayBuffer();
-    const { width, height, data } = jpeg.decode(buffer, { useTArray: true });
+    // Turn the base64 string into JPEG bytes and decode them into RGB(A) pixels.
+    // (fetch() on a local file:// URI doesn't return the file's bytes in React
+    // Native, which made jpeg-js fail with "SOI not found".)
+    const bytes = tf.util.encodeString(resized.base64!, 'base64');
+    const { width, height, data } = jpeg.decode(bytes, { useTArray: true });
 
     // Drop the alpha channel -- MobileNet expects RGB, not RGBA.
     const rgb = new Uint8Array(width * height * 3);
