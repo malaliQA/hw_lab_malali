@@ -1,20 +1,26 @@
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import StartView from './views/StartView';
+import GameView from './views/GameView';
+import LevelCompleteView from './views/LevelCompleteView';
+import type { RootStackParamList } from './types';
 
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+// Root component: a header-less stack of Start, Game and Level Complete screens.
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+    return (
+        <>
+            <StatusBar style="light" />
+            <NavigationContainer>
+                <Stack.Navigator initialRouteName="Start" screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="Start" component={StartView} />
+                    <Stack.Screen name="Game" component={GameView} />
+                    <Stack.Screen name="LevelComplete" component={LevelCompleteView} />
+                </Stack.Navigator>
+            </NavigationContainer>
+        </>
+    );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
